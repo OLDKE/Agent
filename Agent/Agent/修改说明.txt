@@ -1,0 +1,2 @@
+1、MyKillProcess函数的修改
+2、取消了原来的myzip类，通过现有的ZipDll.dll动态库来进行解压缩工作
