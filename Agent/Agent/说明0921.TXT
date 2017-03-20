@@ -1,9 +1,0 @@
-说明：
-1、增加函数int NTLogic::UpFILE(char *pfilename,char *pfilepath)，此函数只负责上传文件，不做压缩文件操作，
-2、原upfile函数改为upfile_ex()，此函数在上传文件之前，先压缩文件。
-3、硬件信息列表（60023）和软件信息列表（60024）调用的是UpFILE(char *pfilename,char *pfilepath)函数，不做压缩直接上传文件。
-4、编译环境改为.net2005，需要做部分改动。
-   设置1：菜单项：project->ntagent3 property->configuration properties->C/C++->Preprocessor,右边选择preprocessor Definitions,增加_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE。去掉相关警告。
-   设置2：在stdafx.h文件中增加相关内容，参照代码修改。
-5、将原来解析XML报文的方式改为可以在2005环境下使用。修改时直接替换packxml类的头文件和cpp文件即可。
-6、涉及到ftp上传下载的几个函数：upsof1,upadv1,upagent1,upfile,upfile_ex，直接替换这几个函数。修改了FTP连接不上时出现异常的bug。
