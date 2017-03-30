@@ -238,6 +238,128 @@ bool Pack::PackTRN(char* rpttime,char *PackStr, int *PackLen)
 
 	return true;
 }
+bool Pack::PackSNR(char* rpttime, char *PackStr, int *PackLen)
+{
+	int ret = 0;
+
+	char msgbuf[4096];
+	memset(msgbuf, 0x00, sizeof(msgbuf));
+
+	int buflen = 0;
+	char tmpbuf[_MAX_PATH];
+	int tmpbuflen = 0;
+	char szValue[_MAX_PATH];
+	LONG lRes = 0;
+
+	memset(tmpbuf, 0x00, sizeof(tmpbuf));
+
+	char rpttimeall[_MAX_PATH], rpttimetmp[_MAX_PATH];
+	memset(rpttimeall, 0, sizeof(rpttimeall));
+	GetNTReg("SOFTWARE\\Ebring\\Agent\\TRN", "REPORTTIME", rpttimeall);
+	if ((strcmp(rpttimeall, "20080101010101")<0) || (strlen(rpttimeall) != 14))
+		return false;
+	if (strcmp(rpttime, rpttimeall) >= 0)
+		return false;
+
+	memset(szValue, 0, sizeof(szValue));
+	GetNTReg("SOFTWARE\\Ebring\\Agent\\TRN", "TRNNUM", szValue);
+	int maxtrnnum = atoi(szValue);
+	int minnum = 0;
+	memset(rpttimetmp, 0, sizeof(rpttimetmp));
+	for (int i = 1; i <= maxtrnnum; i++)
+	{
+		sprintf(tmpbuf, "SOFTWARE\\Ebring\\Agent\\TRN\\%d", i);
+		memset(szValue, 0, sizeof(szValue));
+		GetNTReg(tmpbuf, "REPORTTIME", szValue);
+
+		if (strcmp(szValue, rpttime)>0 && (strlen(szValue) == 14))
+		{
+			if ((strlen(rpttimetmp) == 0) || (strcmp(szValue, rpttimetmp)<0))
+			{
+				minnum = i;
+				strcpy(rpttimetmp, szValue);
+			}
+		}
+	}
+	if (minnum == 0)
+		return false;
+
+	Sleep(500);//等待应用程序把信息写入注册表
+
+	sprintf(tmpbuf, "SOFTWARE\\Ebring\\Agent\\TRN\\%d", minnum);
+
+	memset(szValue, 0, sizeof(szValue));
+	GetNTReg("SOFTWARE\\Ebring\\Agent\\Config", "ATMNO", szValue);
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "DEVID", szValue);
+
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "TRNTYPE", "TRAN");
+
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "TRNCODE", "40003");
+
+	memset(szValue, 0, sizeof(szValue));
+	GetNowTime(szValue);
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "CTIME", szValue);
+
+	memset(szValue, 0, sizeof(szValue));
+	GetTRNEJ(szValue);
+	SetNTReg(tmpbuf, "TRNEJ", szValue);	//WANGBO ADD FOR RESP
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "TRNEJ", szValue);
+
+	SetNTReg(tmpbuf, "RESP", "0");		//WANGBO ADD FOR RESP
+
+	memset(szValue, 0, sizeof(szValue));
+	GetNTReg(tmpbuf, "TRNDATE", szValue);
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "TTranDate", szValue);
+
+	memset(szValue, 0, sizeof(szValue));
+	GetNTReg(tmpbuf, "TRNTIME", szValue);
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "TTranTime", szValue);
+
+	memset(szValue, 0, sizeof(szValue));
+	GetNTReg(tmpbuf, "TRNEJ_C", szValue);
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "TCliTraceNum", szValue);
+
+	memset(szValue, 0, sizeof(szValue));
+	//	GetNTReg(tmpbuf,"TRNEJ_P",szValue);
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "TServTraceNum", szValue);
+
+	memset(szValue, 0, sizeof(szValue));
+	GetNTReg(tmpbuf, "TRNCODE", szValue);
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "TTranCode", szValue);
+
+	memset(szValue, 0, sizeof(szValue));
+	GetNTReg(tmpbuf, "TRNRET", szValue);
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "TRetCode", szValue);
+
+	memset(szValue, 0, sizeof(szValue));
+	GetNTReg(tmpbuf, "TRNACC1", szValue);
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "TAccNo", szValue);
+
+	memset(szValue, 0, sizeof(szValue));
+	GetNTReg(tmpbuf, "TRNACC2", szValue);
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "TAccNo2", szValue);
+
+	memset(szValue, 0, sizeof(szValue));
+	GetNTReg(tmpbuf, "TRNAMT", szValue);
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "TTranAmt", szValue);
+
+	memset(szValue, 0, sizeof(szValue));
+	GetNTReg(tmpbuf, "TRNCURR", szValue);
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "TCurrency", szValue);
+
+	memset(szValue, 0, sizeof(szValue));
+	GetNTReg(tmpbuf, "TRNFEE", szValue);
+	txtFieldAdd(msgbuf, sizeof(msgbuf), "TFee", szValue);
+
+	strcpy(PackStr, msgbuf);
+	*PackLen = strlen(msgbuf);
+
+	memset(szValue, 0, sizeof(szValue));
+	GetNTReg(tmpbuf, "REPORTTIME", szValue);
+	strcpy(rpttime, szValue);
+
+	return true;
+}
 bool Pack::PackTRN_resp(int TranIndex,char *PackStr, int *PackLen)
 {
 	int ret=0;

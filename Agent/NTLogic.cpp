@@ -282,6 +282,11 @@ bool NTLogic::StartSer(char *Module)
 	{
 		ret=StartSer_Uplog();
 	}
+	else if (!strcmp(module_name, "SNR"))
+	{
+		//发送冠字号信息
+		ret = StartSer_SNR();
+	}
 	else
 	{
 		m_trace->WTrace(LOG_GRP, LOG_STEP, LT_ERROR, "StartSer module no found. module=[%s]", module_name);
@@ -2417,6 +2422,19 @@ bool NTLogic::StartSer_Trn()
 	Sleep(200);
 	return true;
 }
+bool NTLogic::StartSer_SNR()
+{
+
+	//20秒发送一次交易60000
+	TranTimer = SetTimer(SNRTIMER_EVENT, 20000, NULL);
+	if (TranTimer == 0)
+		m_trace->WTrace(LOG_GRP, LOG_STEP, LT_INFO, "CreateTimer SNRTimer  fail !");
+	else
+		m_trace->WTrace(LOG_GRP, LOG_STEP, LT_INFO, "CreateTimer SNRTimer  success !");
+
+	Sleep(200);
+	return true;
+}
 bool NTLogic::StartSer_RtCard()
 {
 
@@ -2455,6 +2473,11 @@ void NTLogic::OnTimer(UINT_PTR nIDEvent)
 	{
 		TimerSend_Tran();
 	}
+	else if (nIDEvent == SNRTIMER_EVENT)
+	{
+		TimerSend_SNR();
+	}
+	
 
 
 	CDialog::OnTimer(nIDEvent);
@@ -2584,18 +2607,7 @@ void NTLogic::TimerSend_Tran()
 	char SendMsg[4096];
 	int SendMsgLen=0;
 	memset(SendMsg,0,sizeof(SendMsg));
-	/*char RptTime[256];
-	memset(RptTime,0,sizeof(RptTime));
-	strcpy(RptTime,RptTrnTime);
-	m_trace->WTrace(LOG_GRP,LOG_STEP,LT_INFO,"The RptTime is [%s],RptTrnTime is [%s]",RptTime,RptTrnTime);*/
 
-	//char RespFlag[256];
-	//GetNTReg("SOFTWARE\\Ebring\\Agent\\Config","RESP_FLAG",RespFlag);
-	//if(!strcmp(RespFlag,"1"))
-	//{
-	//	m_trace->WTrace(LOG_GRP,LOG_STEP,LT_INFO,"Chk_TRN_Resp");
-	//	Chk_TRN_Resp();
-	//}
 	int pos = 0;	//返回打包的位置
 	while(PackTRN(pos,SendMsg,&SendMsgLen))
 	{
@@ -2613,6 +2625,47 @@ void NTLogic::TimerSend_Tran()
 		memset(SendMsg,0,sizeof(SendMsg));
 		SendMsgLen=0;	
 	/*	m_trace->WTrace(LOG_GRP,LOG_STEP,LT_INFO,"The RptTime is[%s]",RptTime);
+		SetNTReg("SOFTWARE\\Ebring\\Agent\\TMP","TIME_RPTTRN",RptTime);*/
+	}
+	m_trace->WTrace(LOG_GRP, LOG_STEP, LT_INFO, "Package Failed");
+	//strcpy(RptTrnTime,RptTime);
+	//回执机制待确定
+	//可以加到CheckSndStat里面，若没有收到回执，下次检查
+}
+void NTLogic::TimerSend_SNR()
+{
+	char SendMsg[4096];
+	int SendMsgLen = 0;
+	memset(SendMsg, 0, sizeof(SendMsg));
+	/*char RptTime[256];
+	memset(RptTime,0,sizeof(RptTime));
+	strcpy(RptTime,RptTrnTime);
+	m_trace->WTrace(LOG_GRP,LOG_STEP,LT_INFO,"The RptTime is [%s],RptTrnTime is [%s]",RptTime,RptTrnTime);*/
+
+	//char RespFlag[256];
+	//GetNTReg("SOFTWARE\\Ebring\\Agent\\Config","RESP_FLAG",RespFlag);
+	//if(!strcmp(RespFlag,"1"))
+	//{
+	//	m_trace->WTrace(LOG_GRP,LOG_STEP,LT_INFO,"Chk_TRN_Resp");
+	//	Chk_TRN_Resp();
+	//}
+	int pos = 0;	//返回打包的位置
+	while (PackSNR(pos, SendMsg, &SendMsgLen))
+	{
+		m_trace->WTrace(LOG_GRP, LOG_STEP, LT_INFO, "Package Successed");
+		if (!m_udpser->SendMsg(SendMsg, SendMsgLen))
+		{
+			m_trace->WTrace(LOG_GRP, LOG_STEP, LT_INFO, "SNR Send fail");
+			return;
+		}
+		m_trace->WTrace(LOG_GRP, LOG_STEP, LT_INFO, "SNR Send Successed");
+		char tmpbuf[_MAX_PATH];
+		memset(tmpbuf, 0x00, sizeof(tmpbuf));
+		sprintf(tmpbuf, "SOFTWARE\\EBRING\\Agent\\Config\\FLOWA\\MESSAGES\\SNR\\%d", pos);
+		SetNTReg(tmpbuf, "SIGNAL", "1");
+		memset(SendMsg, 0, sizeof(SendMsg));
+		SendMsgLen = 0;
+		/*	m_trace->WTrace(LOG_GRP,LOG_STEP,LT_INFO,"The RptTime is[%s]",RptTime);
 		SetNTReg("SOFTWARE\\Ebring\\Agent\\TMP","TIME_RPTTRN",RptTime);*/
 	}
 	m_trace->WTrace(LOG_GRP, LOG_STEP, LT_INFO, "Package Failed");
@@ -3411,6 +3464,25 @@ bool NTLogic::PackTRN(int &pos, char *PackStr, int *PackLen)
 	{
 		bret=m_packxml->PackTRN(pos,msg,PackLen);
 		strcpy(PackStr,msg);
+		return bret;
+	}
+	else
+	{
+		//bret=m_pack->PackTRN(pos,msg,PackLen);
+		//strcpy(PackStr,msg);
+		return bret;
+	}
+}
+
+bool NTLogic::PackSNR(int &pos, char *PackStr, int *PackLen)
+{
+	bool bret = false;
+	char msg[2048];
+	memset(msg, 0, sizeof(msg));
+	if (PackMsg_Flag == TRUE)
+	{
+		bret = m_packxml->PackSNR(pos, msg, PackLen);
+		strcpy(PackStr, msg);
 		return bret;
 	}
 	else

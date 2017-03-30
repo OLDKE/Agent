@@ -195,10 +195,11 @@ BOOL CNTAgent3Dlg::OnInitDialog()
 	//Çå¿ÕÃüÁî±êÖ¾
 	SetNTReg("SOFTWARE\\Ebring\\Agent\\TMP","CMD_DELAY","0");
  	//m_ntlogic->StartSer("CopyTrace");
- 	m_ntlogic->StartSer("Trn");
- 	m_ntlogic->StartSer("Snd");	//²âÊÔÆÁ±Î
+ 	//m_ntlogic->StartSer("Trn");	//½»Ò×ÐÅÏ¢//²âÊÔÆÁ±Î
+ 	//m_ntlogic->StartSer("Snd");	//Éè±¸×´Ì¬//²âÊÔÆÁ±Î
  	//m_ntlogic->StartSer("RtC");
 	m_ntlogic->StartSer("Rev");//²âÊÔÆÁ±Î
+	m_ntlogic->StartSer("SNR");//¹Ú×ÖºÅÐÅÏ¢
 
     //m_ntlogic->StartXfs();
 

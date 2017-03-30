@@ -2,6 +2,7 @@
 #include "UDPServer.h"
 #include "LogicCommon.h"
 
+
 CUDPServer::CUDPServer(CNTTRACE *pTrace,LPVOID ptr)
 {
 	m_trace=pTrace;
@@ -174,7 +175,7 @@ bool CUDPServer::SendMsg(char * szBuf,int length,char * szremoteIP,int port)
 	GetNTReg("SOFTWARE\\Ebring\\Agent\\Config","KEY",szValue);	
 	char outbuf[8000]={0};
 	m_trace->WTrace(LOG_GRP, LOG_COMM, LT_INFO, "发送报文 明文=[%s]", szBuf);
-
+	
 	m_mydes->Enc(szBuf,szValue,outbuf);  //报文加密
 	//strcpy(outbuf, szBuf);
 	m_trace->WTrace(LOG_GRP, LOG_COMM, LT_INFO, "加密后=[%s]", "");
@@ -211,8 +212,10 @@ bool CUDPServer::SendMsg(char * szBuf,int length,char * szremoteIP,int port)
 	server.sin_port=htons(m_RemotePort);					//server的监听端口
 	server.sin_addr.s_addr=inet_addr(m_szRemoteIP);			//server的地址 
 	agentsocket=socket(AF_INET,SOCK_DGRAM,0);
-	m_trace->WTrace(LOG_GRP, LOG_COMM, LT_DEBUG, "发送报文密文[%s][%d][%s]", m_szRemoteIP, m_RemotePort, outbuf);
-	if(sendto(agentsocket,outbuf,strlen(outbuf),0,(struct sockaddr*)&server,len)!=SOCKET_ERROR)
+//	m_trace->WTrace(LOG_GRP, LOG_COMM, LT_DEBUG, "发送报文密文[%s][%d][%s]", m_szRemoteIP, m_RemotePort, outbuf);
+	m_trace->WTrace(LOG_GRP, LOG_COMM, LT_DEBUG, "发送报文密文[%s][%d][%s]", m_szRemoteIP, m_RemotePort,szBuf);
+//if(sendto(agentsocket,outbuf,strlen(outbuf),0,(struct sockaddr*)&server,len)!=SOCKET_ERROR)
+	if (sendto(agentsocket, szBuf, strlen(szBuf), 0, (struct sockaddr*)&server, len) != SOCKET_ERROR)
 	{
 		m_trace->WTrace(LOG_GRP, LOG_COMM, LT_INFO, "发送报文成功");
 		closesocket(agentsocket);

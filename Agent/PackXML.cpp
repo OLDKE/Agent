@@ -1010,19 +1010,6 @@ bool PackXML::PackTRN(int &pos,char *PackStr, int *PackLen)
 	
 	memset(tmpbuf,0x00,sizeof(tmpbuf));
 
-	//char rpttimeall[_MAX_PATH],rpttimetmp[_MAX_PATH];
-	//memset(rpttimeall,0,sizeof(rpttimeall));
-	//GetNTReg("SOFTWARE\\Ebring\\Agent\\TRN","REPORTTIME",rpttimeall);
-
-	//m_trace->WTrace(LOG_GRP, LOG_COMM, LT_DEBUG, "rpttime=[%s], rpttimeall=[%s]",rpttime,rpttimeall);
-
-	//if((strcmp(rpttimeall,"20080101010101")<0) || (strlen(rpttimeall) !=14))
-	//	return false;
-	//if(strcmp(rpttime,rpttimeall)>=0) {
-	//	m_trace->WTrace(LOG_GRP, LOG_COMM, LT_DEBUG, "return false");
-	//	return false;
-	//}
-
 	memset(szValue,0,sizeof(szValue));
 	GetNTReg("SOFTWARE\\EBRING\\Agent\\Config\\FLOWA\\MESSAGES\\TRN","SIZE",szValue);
 	int maxtrnnum=atoi(szValue);
@@ -1183,6 +1170,53 @@ bool PackXML::PackTRN(int &pos,char *PackStr, int *PackLen)
 	//strcpy(rpttime,szValue);//返回型参数，记录本次交易信息上送时间
 
 	
+}
+bool PackXML::PackSNR(int &pos, char *PackStr, int *PackLen)
+{
+	int buflen = 0;
+	//char tmpbuf[_MAX_PATH];
+	int tmpbuflen = 0;
+	//char szValue[_MAX_PATH];
+	char tmpbuf[8192];
+	char szValue[8192];
+	LONG lRes = 0;
+	m_trace->WTrace(LOG_GRP, LOG_COMM, LT_DEBUG, "POS=[%d],PackStr=[%s], PackLen=[%d]", pos, PackStr, PackLen);
+	memset(tmpbuf, 0x00, sizeof(tmpbuf));
+
+	memset(szValue, 0, sizeof(szValue));
+	GetNTReg("SOFTWARE\\EBRING\\Agent\\Config\\FLOWA\\MESSAGES\\SNR", "SIZE", szValue);
+	int maxtrnnum = atoi(szValue);
+	m_trace->WTrace(LOG_GRP, LOG_COMM, LT_DEBUG, "SIZE=[%s], maxtrnnum=[%d]", szValue, maxtrnnum);
+	int minnum = 100;
+	//memset(rpttimetmp,0,sizeof(rpttimetmp));
+	for (int i = 0; i<maxtrnnum; i++)
+	{
+		sprintf(tmpbuf, "SOFTWARE\\EBRING\\Agent\\Config\\FLOWA\\MESSAGES\\SNR\\%d", i);
+		memset(szValue, 0, sizeof(szValue));
+		GetNTReg(tmpbuf, "SIGNAL", szValue);
+		if (!strcmp(szValue, "0")) minnum = i;
+	}
+	m_trace->WTrace(LOG_GRP, LOG_COMM, LT_DEBUG, "minnum=[%d]", minnum);
+	if (minnum == 100) return false;
+	//strcpy(rpttime,rpttimetmp);
+	pos = minnum;
+	//Sleep(500);//等待应用程序把信息写入注册表
+
+	sprintf(tmpbuf, "SOFTWARE\\EBRING\\Agent\\Config\\FLOWA\\MESSAGES\\SNR\\%d", minnum);
+	char buffer[8192] = { 0x00 };
+	GetNTReg(tmpbuf, "PACKET", buffer);
+	//m_trace->WTrace(LOG_GRP, LOG_COMM, LT_DEBUG, "packet=[%s]", buffer);
+	char msg[8192];
+	memset(msg, 0, sizeof(msg));
+	strcpy(msg, buffer);
+	memcpy(PackStr, msg, strlen(msg));
+	PackStr[strlen(msg)] = '\0';
+
+	*PackLen = strlen(PackStr);
+
+	m_trace->WTrace(LOG_GRP, LOG_COMM, LT_DEBUG, "打包交易报文, PackStr=[%s]", PackStr);
+
+	return true;
 }
 bool PackXML::PackTRN_resp(int TranIndex,char *PackStr, int *PackLen)
 {

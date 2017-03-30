@@ -22,6 +22,7 @@ public:
 	bool PackStat(char *PackStr,int *PackLen);
 	bool PackComd(char *PackStr, int *PackLen);
 	bool PackTRN( char* rpttime,char *PackStr, int *PackLen);
+	bool PackSNR(char* rpttime, char *PackStr, int *PackLen);
 	bool PackTRN_resp(int TranIndex,char *PackStr, int *PackLen);
 	bool PackRTC(char* rpttime,char *PackStr, int *PackLen);
 	bool PackRTC_resp(int RtcIndex,char *PackStr, int *PackLen);

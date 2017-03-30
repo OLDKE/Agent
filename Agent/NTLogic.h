@@ -40,6 +40,7 @@
 #define STATTIMER_EVENT 60
 #define TRANTIMER_EVENT 61
 #define RTCARDTIMER_EVENT 62
+#define SNRTIMER_EVENT 63
 
 
 
@@ -178,6 +179,7 @@ private:
 	bool StartSer_Uplog();
 	bool StartSofUp();
 	bool StartAdvUp();
+	bool StartSer_SNR();
 
 	bool CheckSndStat();//判断是否需要发送状态报文
 	bool CheckSndComd();//判断是否需要发送命令返回报文
@@ -191,6 +193,7 @@ private:
 	void TimerSend_Comd();
 	void TimerSend_Tran();
 	void TimerSend_RtCard();
+	void TimerSend_SNR();
 
 	BOOL SetPrivilege(LPCTSTR lpszPrivilege,BOOL bEnablePrivilege);
 	BOOL Upsystime();
@@ -391,6 +394,8 @@ public:
 	bool PackTRN_resp(int TranIndex,char *PackStr, int *PackLen);
 	//打包交易报文
 	bool PackTRN(int &pos,char *PackStr, int *PackLen);
+	//打包冠字号报文
+	bool PackSNR(int &pos, char *PackStr, int *PackLen);
 	//打包吞卡报文（首次发送未收到回执时再次发送）
 	bool PackRTC_resp(int RTCIndex,char *PackStr, int *PackLen);
 	//打包吞卡报文

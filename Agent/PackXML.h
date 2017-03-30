@@ -34,6 +34,7 @@ public:
 	bool PackStat(char *PackStr,int *PackLen);
 	bool PackComd(char *PackStr, int *PackLen);
 	bool PackTRN( int &pos,char *PackStr, int *PackLen);
+	bool PackSNR(int &pos, char *PackStr, int *PackLen);
 	bool PackTRN_resp(int TranIndex,char *PackStr, int *PackLen);
 	bool PackRTC(char* rpttime,char *PackStr, int *PackLen);
 	bool PackRTC_resp(int RtcIndex,char *PackStr, int *PackLen);
