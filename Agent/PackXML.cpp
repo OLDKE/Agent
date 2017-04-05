@@ -1194,7 +1194,11 @@ bool PackXML::PackSNR(int &pos, char *PackStr, int *PackLen)
 		sprintf(tmpbuf, "SOFTWARE\\EBRING\\Agent\\Config\\FLOWA\\MESSAGES\\SNR\\%d", i);
 		memset(szValue, 0, sizeof(szValue));
 		GetNTReg(tmpbuf, "SIGNAL", szValue);
-		if (!strcmp(szValue, "0")) minnum = i;
+		if (!strcmp(szValue, "0"))
+		{
+			minnum = i;
+			break;
+		}
 	}
 	m_trace->WTrace(LOG_GRP, LOG_COMM, LT_DEBUG, "minnum=[%d]", minnum);
 	if (minnum == 100) return false;

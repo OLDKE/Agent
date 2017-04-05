@@ -1,12 +1,15 @@
 #include "stdafx.h"
 #include "UDPServer.h"
 #include "LogicCommon.h"
+#include "resource.h"
+#include "NTLogic.h"
 
 
 CUDPServer::CUDPServer(CNTTRACE *pTrace,LPVOID ptr)
 {
 	m_trace=pTrace;
 	m_pWnd = (CWnd*)ptr;
+	mpNtlogic = ((NTLogic*)((CWnd*)ptr));
 	m_mydes =new CMyDes(pTrace);
 	
 	Initialize();
@@ -349,7 +352,10 @@ DWORD WINAPI CUDPServer::OnReceiveThread(LPVOID lpParameter)
 		else
 		{
 			pUDPServer->m_trace->WTrace(LOG_GRP, LOG_COMM, LT_INFO, "接收报文成功");
+			pUDPServer->m_trace->WTrace(LOG_GRP, LOG_COMM, LT_INFO, "==================发送消息准备执行=======================");
 			pUDPServer->m_pWnd->SendMessage(WM_UDPRecv,(WPARAM)recvbuf,(LPARAM)(inet_ntoa(from.sin_addr)));
+			//pUDPServer->mpNtlogic->SNR_RESP();
+			pUDPServer->m_trace->WTrace(LOG_GRP, LOG_COMM, LT_INFO, "=====================消息处理完毕==========================");
 		}
 
 		Sleep(200);

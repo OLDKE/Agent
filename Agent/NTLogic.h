@@ -60,6 +60,7 @@ class NTLogic : public CDialog
 {
 	DECLARE_DYNAMIC(NTLogic)
 
+
 		//for XFS
 public:
  	HSERVICE ptr_h_add[256];
@@ -78,6 +79,7 @@ public:
 	bool InItXFSManager();
 	void Updatatime();
 	void StartXfs();
+	//bool SNR_RESP();
 
 	void Pin_timer();
 	void Cdm_timer();
@@ -118,6 +120,7 @@ public:
 	virtual ~NTLogic();
 	char AgentNo[20];//ATM设备号
 	char AgentPath[60];  //Agent路径
+	int LocalPos;	//SNR上送报文的注册表的位置。
 
 	//Agent程序运行相关路径
 	char m_DOWNLOAD_SOF[MAX_PATH];     //软件升级本地下载路径
@@ -172,6 +175,7 @@ private:
 	UINT Timer_Uplog;
 	char CmdRES_curr[256];
 
+	
 	bool StartSer_Rev();
 	bool StartSer_Snd();
 	bool StartSer_Trn();
@@ -375,7 +379,7 @@ private:
 
 
 
-// 对话框数据
+	// 对话框数据
 	enum { IDD = IDD_NTLOGIC };
 
 protected:
@@ -418,5 +422,7 @@ public:
 	afx_msg LRESULT OnUpLog(WPARAM wParam, LPARAM lParam);
 //	afx_msg LRESULT OnUpdata_SOF(WPARAM wParam, LPARAM lParam);
 //	afx_msg LRESULT OnUpdata_ADV(WPARAM wParam, LPARAM lParam);
+
+
 
 };

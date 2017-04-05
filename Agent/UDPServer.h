@@ -12,10 +12,8 @@
 #include <afxinet.h>
 #include "MyDes.h"
 
-
 #define CLOSE_SOCKET(X) if(X!=INVALID_SOCKET){closesocket(X);X=INVALID_SOCKET;}
-
-
+class NTLogic;
 class CUDPServer  
 {
 public:
@@ -70,6 +68,8 @@ public:
 
 	BOOL FTPGetFile(char* path_H,char* filename_H,char* path_L,char* filename_L,char* FTPIP=NULL,char* FTPUSR=NULL,char* FTPPASS=NULL);
 	BOOL FTPPutFile(char* path_L,char* filename_L,char* path_H,char* filename_H,char* FTPIP=NULL,char* FTPUSR=NULL,char* FTPPASS=NULL);
+private:
+	NTLogic* mpNtlogic;
 };
 
 #endif

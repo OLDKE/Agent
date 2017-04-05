@@ -15,6 +15,7 @@ IMPLEMENT_DYNAMIC(NTLogic, CDialog)
 NTLogic::NTLogic(CNTTRACE *pTrace,CWnd* pParent /*=NULL*/)
 	: CDialog(NTLogic::IDD, pParent)
 {
+	LocalPos = 100;
 	m_hInstDLL=NULL;
 	m_unzip=NULL;
 	m_zip=NULL;
@@ -2650,7 +2651,11 @@ void NTLogic::TimerSend_SNR()
 	//	Chk_TRN_Resp();
 	//}
 	int pos = 0;	//返回打包的位置
-	while (PackSNR(pos, SendMsg, &SendMsgLen))
+	if (!PackSNR(pos, SendMsg, &SendMsgLen))
+	{
+		m_trace->WTrace(LOG_GRP, LOG_STEP, LT_INFO, "Package Failed");
+		return;
+	}
 	{
 		m_trace->WTrace(LOG_GRP, LOG_STEP, LT_INFO, "Package Successed");
 		if (!m_udpser->SendMsg(SendMsg, SendMsgLen))
@@ -2659,16 +2664,19 @@ void NTLogic::TimerSend_SNR()
 			return;
 		}
 		m_trace->WTrace(LOG_GRP, LOG_STEP, LT_INFO, "SNR Send Successed");
-		char tmpbuf[_MAX_PATH];
+		/*char tmpbuf[_MAX_PATH];
 		memset(tmpbuf, 0x00, sizeof(tmpbuf));
 		sprintf(tmpbuf, "SOFTWARE\\EBRING\\Agent\\Config\\FLOWA\\MESSAGES\\SNR\\%d", pos);
-		SetNTReg(tmpbuf, "SIGNAL", "1");
+		m_trace->WTrace(LOG_GRP, LOG_STEP, LT_INFO, "tmpbuf=[%s]",tmpbuf);
+		SetNTReg(tmpbuf, "SIGNAL", "1");*/
+		LocalPos = pos;
+		
 		memset(SendMsg, 0, sizeof(SendMsg));
 		SendMsgLen = 0;
 		/*	m_trace->WTrace(LOG_GRP,LOG_STEP,LT_INFO,"The RptTime is[%s]",RptTime);
 		SetNTReg("SOFTWARE\\Ebring\\Agent\\TMP","TIME_RPTTRN",RptTime);*/
 	}
-	m_trace->WTrace(LOG_GRP, LOG_STEP, LT_INFO, "Package Failed");
+	
 	//strcpy(RptTrnTime,RptTime);
 	//回执机制待确定
 	//可以加到CheckSndStat里面，若没有收到回执，下次检查
@@ -3034,6 +3042,15 @@ bool NTLogic::RespDo(char *resptype,char *respej)
 			if(!strcmp(respej,szValue))
 				SetNTReg(tmpbuf,"RESP","1");
 		}
+	}
+	else if (!strcmp(resptype, "SNR"))
+	{
+		char tmpbuf[_MAX_PATH];
+		memset(tmpbuf, 0x00, sizeof(tmpbuf));
+		sprintf(tmpbuf, "SOFTWARE\\EBRING\\Agent\\Config\\FLOWA\\MESSAGES\\SNR\\%d", LocalPos);
+		SetNTReg(tmpbuf, "SIGNAL", "1");
+		m_trace->WTrace(LOG_GRP, LOG_STEP, LT_INFO, "==============接收到服务器对SNR[%d]的回执=====================",LocalPos);
+		//SetNTReg("SOFTWARE\\Ebring\\Agent\\DevStat", "RESP", "1");
 	}
 	else if(!strcmp(resptype,"STAT"))
 	{
@@ -3715,3 +3732,10 @@ int NTLogic::ControlApp(char *cmd, char *currpath)
 		return -1;
 	}
 }
+
+
+//bool NTLogic::SNR_RESP()
+//{
+//	m_trace->WTrace(LOG_GRP, LOG_STEP, LT_INFO, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+//	return true;
+//}

@@ -47,6 +47,7 @@ static int SetNTReg(char* RegPath,char* RegName,char* RegVal)
 		strcpy(RegVal,"");
 		ret=FALSE;
 	}
+	RegCloseKey(hKey);
 	return ret;
 };
 
